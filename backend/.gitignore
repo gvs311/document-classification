@@ -144,7 +144,7 @@ cython_debug/
 Thumbs.db
 
 # Model files (large binaries)
-*.pt
+#*.pt
 *.pth
 *.h5
 *.pkl
