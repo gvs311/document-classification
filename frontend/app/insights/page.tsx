@@ -82,7 +82,7 @@ export default function InsightsPage() {
         <div className="mx-auto max-w-7xl px-6 py-8">
           <div className="flex h-[60vh] items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-              <Spinner  />
+              <Spinner />
               <p className="text-sm text-muted-foreground">
                 Loading model insights...
               </p>
@@ -137,8 +137,7 @@ export default function InsightsPage() {
             </section>
           )}
 
-          {/* Per-Class Metrics */}
-          {metrics && (
+          {metrics && metrics.per_class && metrics.per_class.length > 0 && (
             <section>
               <h2 className="mb-4 text-xl font-semibold">
                 Class-Level Analysis

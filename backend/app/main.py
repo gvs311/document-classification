@@ -151,10 +151,15 @@ def get_visualizations():
     - confusion matrix
     - confidence distribution
     """
-    return VisualizationsResponse(
-        confusion_matrix_url="/static/confusion_matrix.png",
-        confidence_distribution_url="/static/confidence_distribution.png",
-    )
+    base = str("http://localhost:8000").rstrip("/") 
+    # return VisualizationsResponse(
+    #     confusion_matrix_url="/static/confusion_matrix.png",
+    #     confidence_distribution_url="/static/confidence_distribution.png",
+    # )
+    return {
+        "confusion_matrix_url": f"{base}/static/confusion_matrix.png",
+        "confidence_distribution_url": f"{base}/static/confidence_distribution.png",
+    }
 
 
 @app.get("/comparison/images", response_model=ComparisonImagesResponse)
@@ -164,7 +169,8 @@ def get_comparison_images():
     - ResNet50 vs ViT overall comparison
     - Class-wise F1 comparison chart
     """
-    return ComparisonImagesResponse(
-        model_comparison_url="/static/model_comparison.png",
-        f1_comparison_url="/static/f1_score_comparison.png",
-    )
+    base = str( "http://localhost:8000").rstrip("/")
+    return {
+        "model_comparison_url": f"{base}/static/model_comparison.png",
+        "f1_comparison_url": f"{base}/static/f1_score_comparison.png",
+    }

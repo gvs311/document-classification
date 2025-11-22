@@ -1,22 +1,31 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { VisualizationsResponse } from "@/lib/types"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { VisualizationsResponse } from "@/lib/types";
 
 interface VisualPanelProps {
-  visualizations: VisualizationsResponse
+  visualizations: VisualizationsResponse;
 }
 
 export function VisualPanel({ visualizations }: VisualPanelProps) {
+  console.log(visualizations, "visualizations");
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <Card>
         <CardHeader>
           <CardTitle>Confusion Matrix</CardTitle>
-          <CardDescription>Model prediction accuracy across all classes</CardDescription>
+          <CardDescription>
+            Model prediction accuracy across all classes
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-hidden rounded-lg border border-border bg-muted/20">
             <img
-              src={`data:image/png;base64,${visualizations.confusion_matrix}`}
+              src={visualizations.confusion_matrix_url}
               alt="Confusion Matrix"
               className="w-full h-auto"
             />
@@ -27,12 +36,14 @@ export function VisualPanel({ visualizations }: VisualPanelProps) {
       <Card>
         <CardHeader>
           <CardTitle>Confidence Distribution</CardTitle>
-          <CardDescription>Distribution of model prediction confidence</CardDescription>
+          <CardDescription>
+            Distribution of model prediction confidence
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-hidden rounded-lg border border-border bg-muted/20">
             <img
-              src={`data:image/png;base64,${visualizations.confidence_distribution}`}
+              src={visualizations.confidence_distribution_url}
               alt="Confidence Distribution"
               className="w-full h-auto"
             />
@@ -40,5 +51,5 @@ export function VisualPanel({ visualizations }: VisualPanelProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
