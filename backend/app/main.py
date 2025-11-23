@@ -92,6 +92,86 @@ async def predict_image(file: UploadFile = File(...)):
     )
 
 
+# ---------- NEW: PDF → per-page predictions ----------
+
+@app.post("/predict-pdf")
+async def predict_pdf(file: UploadFile = File(...)):
+    """
+    PDF classifier:
+    - Upload a PDF
+    - Auto-split into pages
+    - Classify each page with the existing model
+    - Return per-page predictions + Grad-CAM
+
+    NOTE: Requires `pymupdf`:
+        pip install pymupdf
+    """
+    # Basic content-type / extension check
+    if (
+        not file.filename.lower().endswith(".pdf")
+        and "pdf" not in (file.content_type or "")
+    ):
+        raise HTTPException(status_code=400, detail="File must be a PDF")
+
+    contents = await file.read()
+
+    # Lazy imports so that the app can still start if these libs are missing
+    try:
+        import fitz  # PyMuPDF
+        from PIL import Image
+    except ImportError:
+        raise HTTPException(
+            status_code=500,
+            detail="PDF support requires 'pymupdf' and 'Pillow' to be installed.",
+        )
+
+    try:
+        doc = fitz.open(stream=contents, filetype="pdf")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read PDF file")
+
+    if doc.page_count == 0:
+        raise HTTPException(status_code=400, detail="PDF has no pages")
+
+    pages_output = []
+
+    for page_index in range(doc.page_count):
+        page = doc.load_page(page_index)
+        # Render page to an image (PNG in memory)
+        pix = page.get_pixmap(dpi=200)  # adjust DPI if needed
+        mode = "RGB" if pix.n >= 3 else "L"
+
+        image = Image.frombytes(mode, [pix.width, pix.height], pix.samples)
+
+        # Run your existing single-model prediction
+        (
+            label_id,
+            label_name,
+            confidence,
+            abstained,
+            probabilities,
+        ) = inference.predict(image)
+
+        gradcam_b64 = inference.generate_gradcam(image)
+
+        pages_output.append(
+            {
+                "page_number": page_index + 1,
+                "label_id": label_id,
+                "label_name": label_name,
+                "confidence": confidence,
+                "abstained": abstained,
+                "probabilities": probabilities,
+                "gradcam_image": gradcam_b64,
+            }
+        )
+
+    return {
+        "num_pages": len(pages_output),
+        "pages": pages_output,
+    }
+
+
 @app.get("/metrics/test", response_model=MetricsResponse)
 def get_test_metrics():
     """
@@ -151,11 +231,7 @@ def get_visualizations():
     - confusion matrix
     - confidence distribution
     """
-    base = str("http://localhost:8000").rstrip("/") 
-    # return VisualizationsResponse(
-    #     confusion_matrix_url="/static/confusion_matrix.png",
-    #     confidence_distribution_url="/static/confidence_distribution.png",
-    # )
+    base = str("http://localhost:8000").rstrip("/")
     return {
         "confusion_matrix_url": f"{base}/static/confusion_matrix.png",
         "confidence_distribution_url": f"{base}/static/confidence_distribution.png",
@@ -169,7 +245,7 @@ def get_comparison_images():
     - ResNet50 vs ViT overall comparison
     - Class-wise F1 comparison chart
     """
-    base = str( "http://localhost:8000").rstrip("/")
+    base = str("http://localhost:8000").rstrip("/")
     return {
         "model_comparison_url": f"{base}/static/model_comparison.png",
         "f1_comparison_url": f"{base}/static/f1_score_comparison.png",

@@ -1,17 +1,18 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export function MainNav() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const links = [
     { href: "/", label: "Classifier" },
+    { href: "/pdf-classifier", label: "PDF Classifier" },
     { href: "/insights", label: "Insights" },
     { href: "/comparison", label: "Comparison" },
-  ]
+  ];
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -19,7 +20,12 @@ export function MainNav() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <svg className="h-5 w-5 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-5 w-5 text-primary-foreground"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -28,7 +34,9 @@ export function MainNav() {
                 />
               </svg>
             </div>
-            <span className="font-semibold text-lg">Document Intelligence Lab</span>
+            <span className="font-semibold text-lg">
+              Document Intelligence Lab
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
@@ -40,7 +48,7 @@ export function MainNav() {
                   "px-4 py-2 rounded-md text-sm font-medium transition-colors",
                   pathname === link.href
                     ? "bg-secondary text-foreground"
-                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground",
+                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                 )}
               >
                 {link.label}
@@ -50,5 +58,5 @@ export function MainNav() {
         </div>
       </div>
     </nav>
-  )
+  );
 }

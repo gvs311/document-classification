@@ -7,3 +7,5 @@ pillow
 python-multipart
 pydantic
 grad-cam
+pymupdf
+Pillow
