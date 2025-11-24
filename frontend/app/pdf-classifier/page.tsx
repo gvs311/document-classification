@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import {
   Card,
@@ -21,6 +20,21 @@ import { Upload, FileText, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { predictPdf } from "@/lib/api";
 import type { PdfPredictionResponse, PdfPagePrediction } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+const CLASS_LABELS = [
+  "ADVE",
+  "Email",
+  "Form",
+  "Letter",
+  "Memo",
+  "News",
+  "Note",
+  "Report",
+  "Resume",
+  "Scientific",
+];
+
+const getClassLabel = (idx: number) => CLASS_LABELS[idx] ?? `Class ${idx}`;
 
 export default function PdfClassifierPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -96,19 +110,21 @@ export default function PdfClassifierPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-[1800px] p-6">
+      <div className="mx-auto max-w-[1600px] p-6">
+        {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight">
             PDF Document Classifier
           </h1>
           <p className="mt-2 text-muted-foreground">
             Analyze multi-page PDF documents with page-level classification and
-            explainability
+            explainability.
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[400px_1fr_1fr]">
-          {/* LEFT PANEL: Upload & Summary */}
+        {/* REAL LAYOUT: 2 columns */}
+        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+          {/* LEFT: Upload + Summary */}
           <div className="space-y-6">
             {/* Upload Card */}
             <Card>
@@ -120,7 +136,7 @@ export default function PdfClassifierPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Drag and Drop Area */}
+                {/* Drag & Drop */}
                 <div
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -166,7 +182,7 @@ export default function PdfClassifierPage() {
                   </label>
                 </div>
 
-                {/* Error Message */}
+                {/* Error */}
                 {error && (
                   <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
@@ -186,7 +202,7 @@ export default function PdfClassifierPage() {
               </CardContent>
             </Card>
 
-            {/* Summary Card */}
+            {/* Summary */}
             {summary && (
               <Card>
                 <CardHeader>
@@ -250,7 +266,7 @@ export default function PdfClassifierPage() {
                           {summary.unsureCount === 1
                             ? "page has"
                             : "pages have"}{" "}
-                          low confidence or abstained predictions
+                          low confidence or abstained predictions.
                         </AlertDescription>
                       </Alert>
                     </>
@@ -260,196 +276,207 @@ export default function PdfClassifierPage() {
             )}
           </div>
 
-          {/* MIDDLE PANEL: Pages List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Pages</CardTitle>
-              <CardDescription>
-                {result
-                  ? `${result.num_pages} pages analyzed`
-                  : "No PDF analyzed yet"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
-                  ))}
-                </div>
-              ) : result ? (
-                <ScrollArea className="h-[calc(100vh-280px)]">
-                  <div className="space-y-2 pr-4">
-                    {result.pages.map((page, index) => {
-                      const isUnsure = page.abstained || page.confidence < 0.5;
-                      const isSelected = selectedPageIndex === index;
-
-                      return (
-                        <button
-                          key={page.page_number}
-                          onClick={() => setSelectedPageIndex(index)}
-                          className={cn(
-                            "w-full rounded-lg border p-4 text-left transition-all hover:border-primary",
-                            isSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border"
-                          )}
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1">
-                              <div className="mb-1 flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm font-medium">
-                                  Page {page.page_number}
-                                </span>
-                              </div>
-                              <div className="mb-2 text-base font-semibold">
-                                {page.label_name}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                Confidence: {(page.confidence * 100).toFixed(1)}
-                                %
-                              </div>
-                            </div>
-                            <Badge
-                              variant={isUnsure ? "destructive" : "secondary"}
-                            >
-                              {isUnsure ? "Unsure" : "Confident"}
-                            </Badge>
-                          </div>
-                        </button>
-                      );
-                    })}
+          {/* RIGHT: Pages list + Page details stacked */}
+          <div className="space-y-6">
+            {/* Pages List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Pages</CardTitle>
+                <CardDescription>
+                  {result
+                    ? `${result.num_pages} pages analyzed`
+                    : "No PDF analyzed yet"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full" />
+                    ))}
                   </div>
-                </ScrollArea>
-              ) : (
-                <div className="flex h-[400px] flex-col items-center justify-center text-center">
-                  <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Upload and analyze a PDF to see page results
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                ) : result ? (
+                  <ScrollArea className="max-h-[60vh]">
+                    <div className="space-y-2 pr-4">
+                      {result.pages.map((page, index) => {
+                        const isUnsure =
+                          page.abstained || page.confidence < 0.5;
+                        const isSelected = selectedPageIndex === index;
 
-          {/* RIGHT PANEL: Page Detail */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Page Details</CardTitle>
-              <CardDescription>
-                {selectedPage
-                  ? `Page ${selectedPage.page_number} analysis`
-                  : "Select a page to view details"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="space-y-4">
-                  <Skeleton className="h-8 w-3/4" />
-                  <Skeleton className="h-32 w-full" />
-                  <Skeleton className="h-64 w-full" />
-                </div>
-              ) : selectedPage ? (
-                <ScrollArea className="h-[calc(100vh-280px)]">
-                  <div className="space-y-6 pr-4">
-                    {/* Header */}
-                    <div>
-                      <h3 className="mb-2 text-2xl font-bold">
-                        Page {selectedPage.page_number} —{" "}
-                        {selectedPage.label_name}
-                      </h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            Confidence
-                          </span>
-                          <span className="text-2xl font-bold">
-                            {(selectedPage.confidence * 100).toFixed(1)}%
-                          </span>
+                        return (
+                          <button
+                            key={page.page_number}
+                            onClick={() => setSelectedPageIndex(index)}
+                            className={cn(
+                              "w-full rounded-lg border p-4 text-left transition-all hover:border-primary",
+                              isSelected
+                                ? "border-primary bg-primary/5"
+                                : "border-border"
+                            )}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1">
+                                <div className="mb-1 flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm font-medium">
+                                    Page {page.page_number}
+                                  </span>
+                                </div>
+                                <div className="mb-2 text-base font-semibold">
+                                  {page.label_name}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  Confidence:{" "}
+                                  {(page.confidence * 100).toFixed(1)}%
+                                </div>
+                              </div>
+                              <Badge
+                                variant={isUnsure ? "destructive" : "secondary"}
+                              >
+                                {isUnsure ? "Unsure" : "Confident"}
+                              </Badge>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <div className="flex h-[240px] flex-col items-center justify-center text-center">
+                    <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Upload and analyze a PDF to see page results.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Page Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Page Details</CardTitle>
+                <CardDescription>
+                  {selectedPage
+                    ? `Page ${selectedPage.page_number} analysis`
+                    : "Select a page to view details"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-8 w-3/4" />
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                  </div>
+                ) : selectedPage ? (
+                  <ScrollArea className="max-h-[60vh]">
+                    <div className="space-y-6 pr-4">
+                      {/* Header */}
+                      <div>
+                        <h3 className="mb-2 text-2xl font-bold">
+                          Page {selectedPage.page_number} —{" "}
+                          {selectedPage.label_name}
+                        </h3>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">
+                              Confidence
+                            </span>
+                            <span className="text-2xl font-bold">
+                              {(selectedPage.confidence * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={selectedPage.confidence * 100}
+                            className="h-2"
+                          />
                         </div>
-                        <Progress
-                          value={selectedPage.confidence * 100}
-                          className="h-2"
-                        />
+                      </div>
+
+                      {/* Low-conf warning */}
+                      {(selectedPage.abstained ||
+                        selectedPage.confidence < 0.5) && (
+                        <Alert variant="destructive">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertTitle>Model is unsure</AlertTitle>
+                          <AlertDescription>
+                            The confidence for this page is low. Treat this
+                            prediction with caution.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      <Separator />
+
+                      {/* Probabilities with proper names */}
+                      <div>
+                        <h4 className="mb-3 text-sm font-semibold">
+                          Class Probabilities
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedPage.probabilities.map((prob, idx) => {
+                            const label = getClassLabel(idx);
+                            return (
+                              <div key={idx} className="space-y-1">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-medium">{label}</span>
+                                  <span className="text-muted-foreground">
+                                    {(prob * 100).toFixed(1)}%
+                                  </span>
+                                </div>
+                                <Progress
+                                  value={prob * 100}
+                                  className="h-1.5"
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      {/* Grad-CAM */}
+                      <div className="mb-10">
+                        <h4 className="mb-2 text-sm font-semibold">
+                          Grad-CAM Explanation
+                        </h4>
+                        <p className="mb-4 text-xs text-muted-foreground">
+                          Highlights indicate regions most influential for this
+                          prediction.
+                        </p>
+                        <div className="overflow-hidden rounded-lg border border-border">
+                          <img
+                            src={
+                              selectedPage.gradcam_image || "/placeholder.svg"
+                            }
+                            alt={`Grad-CAM for page ${selectedPage.page_number}`}
+                            className="h-auto w-full"
+                          />
+                        </div>
                       </div>
                     </div>
-
-                    {/* Warning for low confidence */}
-                    {(selectedPage.abstained ||
-                      selectedPage.confidence < 0.5) && (
-                      <Alert variant="destructive">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle>Model is unsure</AlertTitle>
-                        <AlertDescription>
-                          The confidence for this page is low. Treat this
-                          prediction with caution.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-
-                    <Separator />
-
-                    {/* Probabilities Section */}
-                    <div>
-                      <h4 className="mb-3 text-sm font-semibold">
-                        Class Probabilities
-                      </h4>
-                      <div className="space-y-2">
-                        {selectedPage.probabilities.map((prob, idx) => (
-                          <div key={idx} className="space-y-1">
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="font-medium">Class {idx}</span>
-                              <span className="text-muted-foreground">
-                                {(prob * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                            <Progress value={prob * 100} className="h-1.5" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* Grad-CAM Section */}
-                    <div>
-                      <h4 className="mb-2 text-sm font-semibold">
-                        Grad-CAM Explanation
-                      </h4>
-                      <p className="mb-4 text-xs text-muted-foreground">
-                        Highlights indicate regions most influential for this
-                        prediction.
-                      </p>
-                      <div className="overflow-hidden rounded-lg border border-border">
-                        <img
-                          src={selectedPage.gradcam_image || "/placeholder.svg"}
-                          alt={`Grad-CAM for page ${selectedPage.page_number}`}
-                          className="h-auto w-full"
-                        />
-                      </div>
-                    </div>
+                  </ScrollArea>
+                ) : (
+                  <div className="flex h-[240px] flex-col items-center justify-center text-center">
+                    <CheckCircle2 className="mb-4 h-12 w-12 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Select a page from the list to see detailed analysis.
+                    </p>
                   </div>
-                </ScrollArea>
-              ) : (
-                <div className="flex h-[400px] flex-col items-center justify-center text-center">
-                  <CheckCircle2 className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Select a page from the list to see detailed analysis
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// Helper function to compute summary statistics
+// Helper: summary stats
 function computeSummary(pages: PdfPagePrediction[]) {
-  // Count labels
   const labelCounts = new Map<
     string,
     { count: number; totalConfidence: number }
@@ -466,7 +493,6 @@ function computeSummary(pages: PdfPagePrediction[]) {
     });
   });
 
-  // Get most frequent label
   let mostFrequentLabel = "";
   let maxCount = 0;
   labelCounts.forEach((data, label) => {
@@ -476,17 +502,14 @@ function computeSummary(pages: PdfPagePrediction[]) {
     }
   });
 
-  // Compute label stats
   const labelStats = Array.from(labelCounts.entries()).map(([label, data]) => ({
     label,
     count: data.count,
     avgConfidence: (data.totalConfidence / data.count) * 100,
   }));
 
-  // Sort by count descending
   labelStats.sort((a, b) => b.count - a.count);
 
-  // Count unsure pages
   const unsureCount = pages.filter(
     (page) => page.abstained || page.confidence < 0.5
   ).length;
