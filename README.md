@@ -22,9 +22,9 @@ pip install -r requirements.txt
 
 # Step 4: Start the backend server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-Here’s the Frontend (Next.js) section formatted exactly like your Backend one — clean, consistent, and ready to paste directly into your README:
-Markdown### 🟩 2. Run the Frontend (Next.js)
+🟩 2. Run the Frontend (Next.js)
 
 ```bash
 # Step 1: Go to frontend folder
@@ -35,3 +35,4 @@ npm install
 
 # Step 3: Start the development server
 npm run dev
+```
