@@ -1,5 +1,4 @@
 # Inference module for document classification
-# Add your model inference logic here
 # backend/app/inference.py
 from __future__ import annotations
 
@@ -68,14 +67,13 @@ model.to(device)
 model.eval()
 
 
-# ---------- Transforms (must match notebook eval transforms) ----------
+# ---------- Transforms ----------
 
 eval_transform = T.Compose([
     T.Grayscale(num_output_channels=1),
     T.Resize((IMG_SIZE, IMG_SIZE)),
     T.ToTensor(),
     T.Normalize(mean=[0.5], std=[0.5]),
-    # training pipeline did normalize on 1 channel and then repeat to 3
     lambda t: t.repeat(3, 1, 1),
 ])
 
@@ -151,7 +149,7 @@ def generate_gradcam(image: Image.Image) -> str:
         target_layers=[target_layer],
     )
 
-    # GradCAM needs gradients enabled
+    # gradients enabled for GradCAM
     grayscale_cam = cam(input_tensor=input_tensor)[0]  # H x W
 
     cam_image = show_cam_on_image(rgb_np, grayscale_cam, use_rgb=True)

@@ -92,7 +92,7 @@ async def predict_image(file: UploadFile = File(...)):
     )
 
 
-# ---------- NEW: PDF → per-page predictions ----------
+# ---------- PDF per-page predictions ----------
 
 @app.post("/predict-pdf")
 async def predict_pdf(file: UploadFile = File(...)):
@@ -115,7 +115,7 @@ async def predict_pdf(file: UploadFile = File(...)):
 
     contents = await file.read()
 
-    # Lazy imports so that the app can still start if these libs are missing
+
     try:
         import fitz  # PyMuPDF
         from PIL import Image
@@ -137,13 +137,13 @@ async def predict_pdf(file: UploadFile = File(...)):
 
     for page_index in range(doc.page_count):
         page = doc.load_page(page_index)
-        # Render page to an image (PNG in memory)
-        pix = page.get_pixmap(dpi=200)  # adjust DPI if needed
+        # Render page to an image
+        pix = page.get_pixmap(dpi=200)  # adjust DPI
         mode = "RGB" if pix.n >= 3 else "L"
 
         image = Image.frombytes(mode, [pix.width, pix.height], pix.samples)
 
-        # Run your existing single-model prediction
+        # Existing single-model prediction
         (
             label_id,
             label_name,
