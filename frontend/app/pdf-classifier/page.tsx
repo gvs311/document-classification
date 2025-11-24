@@ -122,7 +122,6 @@ export default function PdfClassifierPage() {
           </p>
         </div>
 
-        {/* REAL LAYOUT: 2 columns */}
         <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
           {/* LEFT: Upload + Summary */}
           <div className="space-y-6">
@@ -276,7 +275,6 @@ export default function PdfClassifierPage() {
             )}
           </div>
 
-          {/* RIGHT: Pages list + Page details stacked */}
           <div className="space-y-6">
             {/* Pages List */}
             <Card>
@@ -342,7 +340,7 @@ export default function PdfClassifierPage() {
                     </div>
                   </ScrollArea>
                 ) : (
-                  <div className="flex h-[240px] flex-col items-center justify-center text-center">
+                  <div className="flex h-60 flex-col items-center justify-center text-center">
                     <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
                       Upload and analyze a PDF to see page results.
@@ -459,7 +457,7 @@ export default function PdfClassifierPage() {
                     </div>
                   </ScrollArea>
                 ) : (
-                  <div className="flex h-[240px] flex-col items-center justify-center text-center">
+                  <div className="flex h-60 flex-col items-center justify-center text-center">
                     <CheckCircle2 className="mb-4 h-12 w-12 text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
                       Select a page from the list to see detailed analysis.

@@ -1,12 +1,10 @@
-// Type definitions matching FastAPI backend schemas
-
 export interface PredictionResponse {
   label_id: number;
   label_name: string;
   confidence: number;
   abstained: boolean;
-  probabilities: number[]; // Array of probabilities for all 10 classes
-  gradcam_image: string; // Full data URL (data:image/png;base64,...)
+  probabilities: number[];
+  gradcam_image: string;
 }
 
 export interface PdfPagePrediction {
@@ -26,8 +24,8 @@ export interface PdfPredictionResponse {
 
 export interface OverallMetrics {
   accuracy: number;
-  macro_f1: number;
-  weighted_f1: number;
+  macro_avg_f1: number;
+  weighted_avg_f1: number;
 }
 
 export interface PerClassMetric {
@@ -44,11 +42,11 @@ export interface MetricsResponse {
 }
 
 export interface VisualizationsResponse {
-  confusion_matrix: string; // base64 encoded PNG
-  confidence_distribution: string; // base64 encoded PNG
+  confusion_matrix_url: string;
+  confidence_distribution_url: string;
 }
 
 export interface ComparisonImagesResponse {
-  model_comparison_chart: string; // base64 encoded PNG
-  f1_comparison_chart: string; // base64 encoded PNG
+  model_comparison_url: string;
+  f1_comparison_url: string;
 }

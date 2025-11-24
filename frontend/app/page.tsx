@@ -52,9 +52,7 @@ export default function ClassifierPage() {
       <div className="absolute inset-0 radial-glow pointer-events-none" />
 
       <div className="relative mx-auto max-w-7xl px-6 py-8">
-        {/* 2-Column Grid Layout */}
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
-          {/* Left Column: Upload Document */}
           <div className="flex flex-col">
             <UploadPanel
               onFileSelect={handleFileSelect}
@@ -64,9 +62,7 @@ export default function ClassifierPage() {
             />
           </div>
 
-          {/* Right Column: Classification Results */}
           <div className="flex flex-col">
-            {/* Loading State */}
             {isLoading && (
               <div className="flex h-full min-h-[600px] items-center justify-center">
                 <div className="flex flex-col items-center gap-4">

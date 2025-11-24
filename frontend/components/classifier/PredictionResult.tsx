@@ -115,7 +115,7 @@ export function PredictionResult({
               Top 3 Predictions
             </h3>
             <div className="space-y-3">
-              {topProbs.map((item, index) => (
+              {topProbs.map((item) => (
                 <div key={item.className} className="space-y-1.5">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium">{item.className}</span>
