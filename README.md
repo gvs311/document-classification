@@ -24,7 +24,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-🟩 2. Run the Frontend (Next.js)
+### 🟩 2. Run the Frontend (Next.js)
 
 ```bash
 # Step 1: Go to frontend folder
